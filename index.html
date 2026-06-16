@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>open:grounds</title>
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 90'><rect width='90' height='90' fill='%23FF5722'/><path d='M14 44 C12 26, 24 12, 43 13 C57 14, 70 9, 76 23 C82 37, 78 57, 69 65 C61 74, 44 80, 31 76 C18 72, 10 65, 14 44 Z' fill='%23F7F4EC'/><path d='M30 14 C35 35, 38 55, 42 76' fill='none' stroke='%23FF5722' stroke-width='3.5' stroke-linecap='round'/><path d='M12 50 C30 46, 55 44, 78 46' fill='none' stroke='%23FF5722' stroke-width='3.5' stroke-linecap='round'/><circle cx='57' cy='36' r='10' fill='%232F9BD6'/><circle cx='57' cy='36' r='4' fill='%23F7F4EC'/><line x1='57' y1='46' x2='57' y2='56' stroke='%232F9BD6' stroke-width='3' stroke-linecap='round'/></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --paper:  #F7F4EC;
+      --ink:    #15130F;
+      --pink:   #FF3E86;
+      --sky:    #2F9BD6;
+      --grass:  #2F4D22;
+      --flame:  #FF5722;
+      --sun:    #FFC53D;
+      --stone:  #75695A;
+      --border: 2px solid var(--ink);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --tab-h: calc(60px + var(--safe-bottom));
+      --header-h: 56px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%; width: 100%;
+      overflow: hidden;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Space Mono', monospace;
+    }
+
+    body { display: flex; flex-direction: column; }
+
+    /* ═══════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════ */
+    header {
+      display: flex;
+      align-items: center;
+      padding: 0 1.25rem;
+      height: var(--header-h);
+      border-bottom: var(--border);
+      flex-shrink: 0;
+      gap: 0.75rem;
+      background: var(--paper);
+      position: relative;
+      z-index: 20;
+    }
+    .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
+    .brand-mark svg { width: 100%; height: 100%; display: block; }
+    .brand-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1rem, 3vw, 1.45rem);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .brand-title .punct { font-weight: 300; color: var(--flame); }
+    .brand-title .ital  { font-weight: 300; font-style: italic; color: var(--pink); }
+    .brand-sub {
+      font-size: clamp(0.5rem, 1.2vw, 0.62rem);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--stone);
+      margin-top: 2px;
+    }
+
+    /* ═══════════════════════════════════════
+       DESKTOP STAGE
+    ═══════════════════════════════════════ */
+    .stage {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      cursor: none;
+      min-height: 0;
+    }
+
+    #conn-svg {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .tagline {
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .tagline h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.1rem, 3.5vw, 2rem);
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+    .tagline p {
+      font-size: clamp(0.58rem, 1.5vw, 0.72rem);
+      color: var(--stone);
+      margin-top: 0.45rem;
+    }
+
+    /* ── nodes ── */
+    .node {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .node-shape {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: clamp(0.6rem, 1.4vw, 0.78rem);
+      line-height: 1.25;
+      padding: 10px;
+      border: var(--border);
+      transition: transform 0.22s cubic-bezier(.34,1.56,.64,1),
+                  box-shadow 0.18s ease;
+      min-width: 64px;
+      min-height: 64px;
+    }
+    .node--live .node-shape {
+      background: var(--flame);
+      color: var(--paper);
+      border-color: var(--flame);
+    }
+    .node--seed .node-shape {
+      background: var(--paper);
+      color: var(--ink);
+      border-style: dashed;
+    }
+    .shape-circle .node-shape { border-radius: 50%; }
+    .shape-rect   .node-shape { border-radius: 2px; }
+    .shape-diamond .node-shape { transform: rotate(45deg); }
+    .shape-diamond .node-shape span { display: block; transform: rotate(-45deg); }
+
+    .node:hover .node-shape,
+    .node:focus-visible .node-shape { box-shadow: 4px 4px 0 var(--ink); }
+    .node--live:hover .node-shape  { transform: scale(1.1); }
+    .node--seed:hover .node-shape  { transform: scale(1.08); }
+    .shape-diamond:hover .node-shape { transform: rotate(45deg) scale(1.1); }
+    .node:active .node-shape { transform: scale(0.95) !important; box-shadow: none !important; }
+
+    .node-label {
+      position: absolute;
+      bottom: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      background: var(--ink);
+      color: var(--paper);
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(0.5rem, 1.1vw, 0.62rem);
+      line-height: 1.5;
+      padding: 5px 10px;
+      max-width: 180px;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s, transform 0.15s;
+      white-space: normal;
+      z-index: 30;
+    }
+    .node-label::after {
+      content: '';
+      position: absolute;
+      top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--ink);
+    }
+    .node--label-below .node-label {
+      bottom: auto;
+      top: calc(100% + 12px);
+    }
+    .node--label-below .node-label::after {
+      top: auto; bottom: 100%;
+      border-top-color: transparent;
+      border-bottom-color: var(--ink);
+    }
+    .node:hover .node-label,
+    .node:focus-visible .node-label { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .node-status {
+      font-size: clamp(0.48rem, 1vw, 0.58rem);
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.06em;
+      margin-top: 5px;
+      color: var(--stone);
+      text-transform: uppercase;
+      text-align: center;
+    }
+    .node--live .node-status { color: var(--grass); font-weight: 700; }
+
+    /* ── cursor ── */
+    #cursor {
+      position: fixed;
+      width: 16px; height: 16px;
+      border: 2px solid var(--flame);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      transition: width 0.15s, height 0.15s, border-color 0.15s;
+      z-index: 9999;
+      mix-blend-mode: multiply;
+    }
+    #cursor.over { width: 34px; height: 34px; border-color: var(--ink); }
+
+    /* ═══════════════════════════════════════
+       DESKTOP FOOTER
+    ═══════════════════════════════════════ */
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.25rem;
+      height: 38px;
+      border-top: var(--border);
+      flex-shrink: 0;
+      background: var(--paper);
+      position: relative;
+      z-index: 20;
+    }
+    .footer-note { font-size: clamp(0.48rem, 1.2vw, 0.58rem); color: var(--stone); }
+    .footer-links { display: flex; gap: 1rem; }
+    .footer-link {
+      font-size: clamp(0.48rem, 1.2vw, 0.58rem);
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--ink);
+      opacity: 0.45;
+      transition: opacity 0.15s;
+    }
+    .footer-link:hover { opacity: 1; }
+
+    /* ═══════════════════════════════════════
+       MOBILE  (≤ 640px)
+       mirrors the davis site pattern exactly:
+       header + full-height content + bottom tab bar
+    ═══════════════════════════════════════ */
+    @media (max-width: 640px) {
+
+      /* hide desktop chrome */
+      #cursor   { display: none; }
+      .stage    { cursor: default; display: none; }
+      footer    { display: none; }
+      .brand-sub { display: none; }
+
+      header { height: 52px; padding: 0 1rem; }
+      .brand-mark { width: 32px; height: 32px; }
+      .brand-title { font-size: 1.25rem; }
+
+      /* full-height mobile canvas sits below header, above tab bar */
+      .mobile-canvas {
+        display: flex;
+        flex-direction: column;
+        height: calc(100dvh - 52px - var(--tab-h));
+        overflow: hidden;
+      }
+
+      /* ── hero area ── */
+      .mobile-hero {
+        padding: 2rem 1.25rem 1.5rem;
+        border-bottom: var(--border);
+        flex-shrink: 0;
+      }
+      .mobile-hero h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 2rem;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+      .mobile-hero p {
+        font-size: 0.7rem;
+        color: var(--stone);
+        margin-top: 0.4rem;
+      }
+
+      /* ── project list ── */
+      .mobile-projects {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .mobile-project {
+        display: flex;
+        align-items: stretch;
+        border-bottom: var(--border);
+        min-height: 72px;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition: background 0.1s;
+        text-decoration: none;
+        color: inherit;
+      }
+      .mobile-project:active { background: rgba(21,19,15,0.06); }
+
+      /* left colour stripe */
+      .mp-stripe {
+        width: 6px;
+        flex-shrink: 0;
+      }
+
+      .mp-body {
+        flex: 1;
+        padding: 1rem 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.25rem;
+      }
+      .mp-name {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+      }
+      .mp-desc {
+        font-size: 0.65rem;
+        color: var(--stone);
+        line-height: 1.4;
+      }
+      .mp-status {
+        font-size: 0.55rem;
+        font-family: 'Space Mono', monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-top: 0.2rem;
+      }
+      .mp-status--live { color: var(--grass); font-weight: 700; }
+      .mp-status--seed { color: var(--stone); }
+
+      .mp-arrow {
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+        font-size: 1.1rem;
+        color: var(--stone);
+        flex-shrink: 0;
+      }
+      /* only show arrow if it's a live link */
+      .mobile-project--seed .mp-arrow { opacity: 0.2; }
+
+      /* ── bottom tab bar — mirrors davis exactly ── */
+      .mobile-bar {
+        display: flex;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        height: var(--tab-h);
+        padding-bottom: var(--safe-bottom);
+        background: var(--paper);
+        border-top: var(--border);
+        z-index: 500;
+      }
+
+      .mobile-tab {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        background: none;
+        border: none;
+        border-right: 2px solid var(--ink);
+        cursor: pointer;
+        font-family: 'Space Grotesk', sans-serif;
+        padding: 0;
+        transition: background 0.1s;
+        min-height: 44px;
+        text-decoration: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .mobile-tab:last-child { border-right: none; }
+      .mobile-tab:active     { background: rgba(21,19,15,0.12); }
+      .mobile-tab.active     { background: var(--ink); }
+      .mobile-tab.active .mobile-tab-icon,
+      .mobile-tab.active .mobile-tab-label { color: var(--paper); }
+
+      .mobile-tab-icon {
+        font-size: 1.3rem;
+        line-height: 1;
+        color: var(--ink);
+      }
+      .mobile-tab-label {
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--stone);
+      }
+    }
+
+    /* hide mobile elements on desktop only */
+    @media (min-width: 641px) {
+      .mobile-canvas { display: none; }
+      .mobile-bar    { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .node-shape, .node-label, #cursor { transition: none !important; }
+      .mobile-project { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="cursor"></div>
+
+<!-- ═══════════════════════════════════════
+     HEADER  (shared)
+═══════════════════════════════════════ -->
+<header>
+  <div class="brand-mark">
+    <svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+      <rect width="90" height="90" fill="#FF5722"/>
+      <path d="M14 44 C12 26, 24 12, 43 13 C57 14, 70 9, 76 23 C82 37, 78 57, 69 65 C61 74, 44 80, 31 76 C18 72, 10 65, 14 44 Z" fill="#F7F4EC"/>
+      <path d="M30 14 C35 35, 38 55, 42 76" fill="none" stroke="#FF5722" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M12 50 C30 46, 55 44, 78 46" fill="none" stroke="#FF5722" stroke-width="3.5" stroke-linecap="round"/>
+      <circle cx="57" cy="36" r="10" fill="#2F9BD6"/>
+      <circle cx="57" cy="36" r="4" fill="#F7F4EC"/>
+      <line x1="57" y1="46" x2="57" y2="56" stroke="#2F9BD6" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div>
+    <div class="brand-title">open<span class="punct">:</span><span class="ital">grounds</span></div>
+    <div class="brand-sub">common goods projects</div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════
+     DESKTOP  — floating node stage
+═══════════════════════════════════════ -->
+<main class="stage" id="stage">
+  <svg id="conn-svg"></svg>
+
+  <div class="tagline">
+    <h1>common goods,<br>mapped.</h1>
+    <p>start local</p>
+  </div>
+
+  <div class="node node--live shape-circle"
+       id="n-davis"
+       data-xl="22" data-yl="38"
+       data-url="https://opengrounds.github.io/davis/"
+       tabindex="0" role="button" aria-label="davis map">
+    <div class="node-shape" style="width:clamp(76px,9vw,108px);height:clamp(76px,9vw,108px)">
+      davis<br>map
+    </div>
+    <div class="node-label">free &amp; shared resources<br>in davis, ca →</div>
+    <div class="node-status">● live</div>
+  </div>
+
+  <div class="node node--seed shape-rect"
+       id="n-zw"
+       data-xl="72" data-yl="28"
+       data-url="#"
+       tabindex="0" role="button" aria-label="zero waste lives">
+    <div class="node-shape" style="width:clamp(80px,10vw,112px);height:clamp(68px,8vw,92px);border-color:var(--grass)">
+      zero<br>waste<br>lives
+    </div>
+    <div class="node-label">map + living guide<br>forming</div>
+    <div class="node-status">○ seed</div>
+  </div>
+
+  <div class="node node--seed shape-rect node--label-below"
+       id="n-bay"
+       data-xl="75" data-yl="70"
+       data-url="#"
+       tabindex="0" role="button" aria-label="bay area">
+    <div class="node-shape" style="width:clamp(76px,9vw,104px);height:clamp(60px,7vw,82px);border-color:var(--sky)">
+      bay<br>area
+    </div>
+    <div class="node-label">regional access map<br>future</div>
+    <div class="node-status">○ seed</div>
+  </div>
+
+  <div class="node node--seed shape-diamond node--label-below"
+       id="n-print"
+       data-xl="24" data-yl="70"
+       data-url="#"
+       tabindex="0" role="button" aria-label="print map">
+    <div class="node-shape" style="width:clamp(68px,8vw,92px);height:clamp(68px,8vw,92px);border-color:var(--sun)">
+      <span>print<br>map</span>
+    </div>
+    <div class="node-label">printable &amp; forkable<br>start local → any city</div>
+    <div class="node-status">○ seed</div>
+  </div>
+</main>
+
+<footer>
+  <span class="footer-note">davis, ca</span>
+  <nav class="footer-links">
+    <a class="footer-link" href="https://opengrounds.github.io/davis/">map</a>
+    <a class="footer-link" href="https://github.com/opengrounds">github</a>
+  </nav>
+</footer>
+
+<!-- ═══════════════════════════════════════
+     MOBILE  — list layout
+═══════════════════════════════════════ -->
+<div class="mobile-canvas">
+  <div class="mobile-hero">
+    <h1>common goods,<br>mapped.</h1>
+    <p>start local</p>
+  </div>
+
+  <div class="mobile-projects">
+
+    <a class="mobile-project" href="https://opengrounds.github.io/davis/" target="_blank">
+      <div class="mp-stripe" style="background:var(--flame)"></div>
+      <div class="mp-body">
+        <div class="mp-name">davis map</div>
+        <div class="mp-desc">free &amp; shared resources in davis, ca</div>
+        <div class="mp-status mp-status--live">● live</div>
+      </div>
+      <div class="mp-arrow">→</div>
+    </a>
+
+    <div class="mobile-project mobile-project--seed">
+      <div class="mp-stripe" style="background:var(--grass)"></div>
+      <div class="mp-body">
+        <div class="mp-name">zero waste lives</div>
+        <div class="mp-desc">map + living guide for zero-waste living</div>
+        <div class="mp-status mp-status--seed">○ seed</div>
+      </div>
+      <div class="mp-arrow">→</div>
+    </div>
+
+    <div class="mobile-project mobile-project--seed">
+      <div class="mp-stripe" style="background:var(--sky)"></div>
+      <div class="mp-body">
+        <div class="mp-name">bay area</div>
+        <div class="mp-desc">equitable access, regional scale</div>
+        <div class="mp-status mp-status--seed">○ seed</div>
+      </div>
+      <div class="mp-arrow">→</div>
+    </div>
+
+    <div class="mobile-project mobile-project--seed">
+      <div class="mp-stripe" style="background:var(--sun)"></div>
+      <div class="mp-body">
+        <div class="mp-name">print map</div>
+        <div class="mp-desc">printable &amp; forkable — start in davis, take anywhere</div>
+        <div class="mp-status mp-status--seed">○ seed</div>
+      </div>
+      <div class="mp-arrow">→</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- bottom tab bar — same pattern as davis site -->
+<nav class="mobile-bar">
+  <a class="mobile-tab active" href="https://opengrounds.github.io/" aria-label="home">
+    <span class="mobile-tab-icon">⌂</span>
+    <span class="mobile-tab-label">home</span>
+  </a>
+  <a class="mobile-tab" href="https://opengrounds.github.io/davis/" aria-label="map">
+    <span class="mobile-tab-icon">◎</span>
+    <span class="mobile-tab-label">map</span>
+  </a>
+  <a class="mobile-tab" href="https://github.com/opengrounds" aria-label="github">
+    <span class="mobile-tab-icon">↗</span>
+    <span class="mobile-tab-label">github</span>
+  </a>
+</nav>
+
+<script>
+  // ── cursor (desktop only) ──
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top  = e.clientY + 'px';
+  });
+
+  const nodes = document.querySelectorAll('.node');
+  nodes.forEach(n => {
+    n.addEventListener('mouseenter', () => cursor.classList.add('over'));
+    n.addEventListener('mouseleave', () => cursor.classList.remove('over'));
+    n.addEventListener('click', () => {
+      const url = n.dataset.url;
+      if (url && url !== '#') window.open(url, '_blank');
+    });
+    n.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const url = n.dataset.url;
+        if (url && url !== '#') window.open(url, '_blank');
+      }
+    });
+  });
+
+  // ── position desktop nodes ──
+  function positionNodes() {
+    const stage = document.getElementById('stage');
+    if (!stage || stage.offsetWidth === 0) return;
+    const W = stage.offsetWidth;
+    const H = stage.offsetHeight;
+    nodes.forEach(n => {
+      const px = parseFloat(n.dataset.xl) / 100;
+      const py = parseFloat(n.dataset.yl) / 100;
+      n.style.left = (W * px) + 'px';
+      n.style.top  = (H * py) + 'px';
+    });
+    drawConnections();
+  }
+
+  const PAIRS = [
+    ['n-davis', 'n-zw'],
+    ['n-davis', 'n-print'],
+    ['n-zw',    'n-bay'],
+    ['n-print', 'n-bay'],
+    ['n-davis', 'n-bay'],
+  ];
+
+  function centre(el) {
+    const sr = document.getElementById('stage').getBoundingClientRect();
+    const r  = el.getBoundingClientRect();
+    return { x: r.left + r.width/2 - sr.left, y: r.top + r.height/2 - sr.top };
+  }
+
+  function drawConnections() {
+    const svg = document.getElementById('conn-svg');
+    svg.innerHTML = '';
+    PAIRS.forEach(([aId, bId]) => {
+      const a = document.getElementById(aId);
+      const b = document.getElementById(bId);
+      if (!a || !b) return;
+      const ca = centre(a), cb = centre(b);
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', ca.x); line.setAttribute('y1', ca.y);
+      line.setAttribute('x2', cb.x); line.setAttribute('y2', cb.y);
+      line.setAttribute('stroke','#15130F');
+      line.setAttribute('stroke-width','1.5');
+      line.setAttribute('stroke-dasharray','4 7');
+      line.setAttribute('opacity','0.15');
+      svg.appendChild(line);
+    });
+  }
+
+  window.addEventListener('load', positionNodes);
+  window.addEventListener('resize', positionNodes);
+  setTimeout(positionNodes, 80);
+</script>
+</body>
+</html>
