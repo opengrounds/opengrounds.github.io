@@ -1,0 +1,796 @@
+/*
+ * styles.css
+ * open:grounds — main stylesheet
+ *
+ * Table of contents:
+ *   1. CSS custom properties (design tokens)
+ *   2. Reset & base
+ *   3. Header
+ *   4. About button
+ *   5. About overlay / panel
+ *   6. Desktop stage (node canvas)
+ *   7. House nodes
+ *   8. Node animations (pulse, smoke)
+ *   9. Node tooltip
+ *  10. Custom cursor
+ *  11. Desktop footer
+ *  12. Mobile layout (≤640px)
+ *  13. Desktop-only overrides (≥641px)
+ *  14. Reduced-motion overrides
+ */
+
+
+/* ─────────────────────────────────────────────
+   1. CSS CUSTOM PROPERTIES
+   All colours, spacing, and layout values
+   live here so they're easy to tweak later.
+───────────────────────────────────────────── */
+:root {
+  /* brand palette */
+  --paper:  #F7F4EC;
+  --ink:    #15130F;
+  --pink:   #FF3E86;
+  --sky:    #2F9BD6;
+  --grass:  #2F4D22;
+  --flame:  #FF5722;
+  --sun:    #FFC53D;
+  --stone:  #75695A;
+
+  /* subtle grid line colour for the stage background */
+  --paper-dim: #ECE6D9;
+
+  /* shorthand for the recurring 2px solid border */
+  --border: 2px solid var(--ink);
+
+  /* iOS safe-area support for the bottom tab bar */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tab-h: calc(60px + var(--safe-bottom));
+
+  /* fixed heights used for layout calculations */
+  --header-h: 56px;
+}
+
+
+/* ─────────────────────────────────────────────
+   2. RESET & BASE
+   Zero out margins/padding and lock the
+   viewport so the stage fills exactly.
+───────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Space Mono', monospace;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* ─────────────────────────────────────────────
+   3. HEADER
+   Thin top bar with the brand mark,
+   wordmark, and the about button.
+───────────────────────────────────────────── */
+header {
+  display: flex;
+  align-items: center;
+  padding: 0 1.25rem;
+  height: var(--header-h);
+  border-bottom: var(--border);
+  flex-shrink: 0;
+  gap: 0.75rem;
+  background: var(--paper);
+  position: relative;
+  z-index: 20;
+}
+
+/* the little SVG globe icon */
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+.brand-mark svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.brand-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1rem, 3vw, 1.45rem);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* coloured glyphs inside the wordmark */
+.brand-title .punct { font-weight: 300; color: var(--flame); }
+.brand-title .ital  { font-weight: 300; font-style: italic; color: var(--pink); }
+
+.brand-sub {
+  font-size: clamp(0.5rem, 1.2vw, 0.62rem);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--stone);
+  margin-top: 2px;
+}
+
+
+/* ─────────────────────────────────────────────
+   4. ABOUT BUTTON
+   Pill-shaped button that opens the overlay.
+   Inverts on hover.
+───────────────────────────────────────────── */
+.about-btn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem 0.35rem 0.5rem;
+  cursor: pointer;
+  font-family: 'Space Mono', monospace;
+  transition: background 0.15s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.about-btn:hover { background: var(--ink); }
+.about-btn:hover .about-btn-mark { background: var(--paper); color: var(--ink); }
+.about-btn:hover .about-btn-label { color: var(--paper); }
+.about-btn:active { transform: scale(0.95); }
+
+/* the circular "?" badge inside the button */
+.about-btn-mark {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.about-btn-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 700;
+  transition: color 0.15s;
+}
+
+
+/* ─────────────────────────────────────────────
+   5. ABOUT OVERLAY / PANEL
+   Full-screen dimmed backdrop with a centred
+   paper-cut card that slides in from below.
+───────────────────────────────────────────── */
+.about-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(21, 19, 15, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  /* hidden by default — JS adds .open to reveal */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.22s ease, visibility 0.22s ease;
+  padding: 1.5rem;
+}
+.about-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.about-panel {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  max-width: 480px;
+  width: 100%;
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: 2.25rem 2rem 1.75rem;
+  position: relative;
+  /* starts slightly shifted down; springs into place when .open is added */
+  transform: translateY(14px) scale(0.97);
+  transition: transform 0.22s cubic-bezier(.2, .9, .3, 1.2);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.about-overlay.open .about-panel {
+  transform: translateY(0) scale(1);
+}
+
+.about-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+.about-close:hover {
+  background: var(--ink);
+  color: var(--paper);
+  transform: rotate(90deg);
+}
+
+/* small house icon at the top of the panel */
+.about-house {
+  width: 56px;
+  height: 51px;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.about-panel h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+.about-panel h2 .punct { color: var(--flame); font-weight: 300; }
+.about-panel h2 .ital  { color: var(--pink);  font-weight: 300; font-style: italic; }
+
+.about-lede {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--stone);
+  margin-bottom: 1.1rem;
+}
+
+.about-panel p {
+  font-size: 0.74rem;
+  line-height: 1.65;
+  margin-bottom: 1rem;
+  color: var(--ink);
+}
+
+/* icon + description rows in the legend */
+.about-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  padding: 0.9rem 0;
+  margin: 1.1rem 0;
+}
+.about-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.about-legend-item svg {
+  width: 30px;
+  height: 27px;
+  flex-shrink: 0;
+}
+.about-legend-item span {
+  font-size: 0.68rem;
+  color: var(--stone);
+}
+
+/* small signature line at the bottom of the panel */
+.about-sign {
+  font-size: 0.6rem !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--stone) !important;
+  margin-bottom: 0 !important;
+}
+
+
+/* ─────────────────────────────────────────────
+   6. DESKTOP STAGE
+   The canvas where house nodes are placed.
+   Uses a CSS grid overlay as a background.
+───────────────────────────────────────────── */
+.stage {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  cursor: none; /* hidden in favour of the custom cursor */
+  min-height: 0;
+  background-image:
+    linear-gradient(var(--paper-dim) 1px, transparent 1px),
+    linear-gradient(90deg, var(--paper-dim) 1px, transparent 1px);
+  background-size: 56px 56px;
+  background-position: center;
+}
+
+/* the SVG layer that draws dashed connection lines between nodes */
+#conn-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* centred tagline sitting behind the nodes */
+.tagline {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 2;
+  background: var(--paper);
+  padding: 0.4rem 1.2rem;
+}
+.tagline h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.1rem, 3.2vw, 1.85rem);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+.tagline p {
+  font-size: clamp(0.56rem, 1.4vw, 0.68rem);
+  color: var(--stone);
+  margin-top: 0.4rem;
+  letter-spacing: 0.02em;
+}
+
+
+/* ─────────────────────────────────────────────
+   7. HOUSE NODES
+   Each project is a clickable node placed
+   absolutely on the stage. The house SVG sits
+   inside a wrapper that handles the hover
+   lift and the parallax/bob animations.
+───────────────────────────────────────────── */
+.node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* wrapper receives the combined bob + parallax transform each frame */
+.node-house-wrap {
+  display: inline-block;
+  transition: transform 0.18s cubic-bezier(.34, 1.56, .64, 1);
+}
+.node:hover .node-house-wrap  { transform: translateY(-4px) scale(1.05); }
+.node:active .node-house-wrap { transform: translateY(0) scale(0.94); }
+.node:focus-visible .node-house-wrap {
+  outline: 2px dashed var(--ink);
+  outline-offset: 6px;
+  border-radius: 2px;
+}
+
+.node-house {
+  display: block;
+  overflow: visible;
+}
+
+/* SVG fill/outline helpers used inside house markup */
+.house-fill    { transition: opacity 0.18s ease; }
+.house-outline { fill: none; stroke: var(--ink); stroke-width: 2.5; }
+.house-outline.dim { stroke: var(--stone); stroke-dasharray: 5 4; }
+
+.node-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: clamp(0.62rem, 1.25vw, 0.78rem);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.node-status {
+  font-size: clamp(0.46rem, 0.95vw, 0.56rem);
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.07em;
+  color: var(--stone);
+  text-transform: uppercase;
+  text-align: center;
+}
+/* live nodes get a green, bold status dot */
+.node--live .node-status {
+  color: var(--grass);
+  font-weight: 700;
+}
+
+
+/* ─────────────────────────────────────────────
+   8. NODE ANIMATIONS
+   Glow pulse under the live node.
+   Smoke puffs drifting up from the chimney.
+───────────────────────────────────────────── */
+
+/* radial glow that breathes in and out */
+.live-pulse {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 87, 34, 0.28) 0%, rgba(255, 87, 34, 0) 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  animation: pulseGlow 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes pulseGlow {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.6; }
+  50%       { transform: translate(-50%, -50%) scale(1.25); opacity: 1;   }
+}
+
+/* each circle starts small, drifts up, and fades out */
+.smoke circle {
+  animation: smokeRise 3.2s ease-in infinite;
+  transform-origin: center;
+}
+.smoke circle:nth-child(1) { animation-delay: 0s;    }
+.smoke circle:nth-child(2) { animation-delay: 1.05s; }
+.smoke circle:nth-child(3) { animation-delay: 2.1s;  }
+
+@keyframes smokeRise {
+  0%   { transform: translate(0, 0) scale(0.6);      opacity: 0;    }
+  15%  {                                              opacity: 0.55; }
+  100% { transform: translate(4px, -22px) scale(1.5); opacity: 0;   }
+}
+
+
+/* ─────────────────────────────────────────────
+   9. NODE TOOLTIP
+   Small dark label that appears above (or
+   below, with .node--tip-below) on hover.
+───────────────────────────────────────────── */
+.node-tip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(0.5rem, 1vw, 0.6rem);
+  line-height: 1.5;
+  padding: 5px 9px;
+  max-width: 180px;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.15s;
+  white-space: normal;
+  z-index: 30;
+}
+/* downward-pointing caret */
+.node-tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ink);
+}
+
+/* flip tooltip below the node when near the top edge */
+.node--tip-below .node-tip {
+  bottom: auto;
+  top: calc(100% + 10px);
+}
+.node--tip-below .node-tip::after {
+  top: auto;
+  bottom: 100%;
+  border-top-color: transparent;
+  border-bottom-color: var(--ink);
+}
+
+/* show tooltip on hover or keyboard focus */
+.node:hover .node-tip,
+.node:focus-visible .node-tip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+
+/* ─────────────────────────────────────────────
+   10. CUSTOM CURSOR
+   A small circle that grows when hovering
+   over an interactive node.
+───────────────────────────────────────────── */
+#cursor {
+  position: fixed;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--flame);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: width 0.15s, height 0.15s, border-color 0.15s;
+  z-index: 9999;
+  mix-blend-mode: multiply;
+}
+/* enlarged state when hovering a node */
+#cursor.over {
+  width: 30px;
+  height: 30px;
+  border-color: var(--ink);
+}
+
+
+/* ─────────────────────────────────────────────
+   11. DESKTOP FOOTER
+   Thin strip with location note and nav links.
+───────────────────────────────────────────── */
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  height: 38px;
+  border-top: var(--border);
+  flex-shrink: 0;
+  background: var(--paper);
+  position: relative;
+  z-index: 20;
+}
+
+.footer-note {
+  font-size: clamp(0.48rem, 1.2vw, 0.58rem);
+  color: var(--stone);
+}
+
+.footer-links { display: flex; gap: 1rem; }
+
+.footer-link {
+  font-size: clamp(0.48rem, 1.2vw, 0.58rem);
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink);
+  opacity: 0.45;
+  transition: opacity 0.15s;
+}
+.footer-link:hover { opacity: 1; }
+
+
+/* ─────────────────────────────────────────────
+   12. MOBILE LAYOUT  (≤ 640px)
+   Replaces the node stage with a scrollable
+   list of project cards and a bottom tab bar.
+───────────────────────────────────────────── */
+@media (max-width: 640px) {
+
+  /* hide desktop-only elements */
+  #cursor    { display: none; }
+  .stage     { cursor: default; display: none; }
+  footer     { display: none; }
+  .brand-sub { display: none; }
+
+  /* tighten up the header a little */
+  header { height: 52px; padding: 0 1rem; }
+  .brand-mark { width: 32px; height: 32px; }
+  .brand-title { font-size: 1.25rem; }
+  .about-btn { padding: 0.3rem 0.7rem 0.3rem 0.4rem; }
+  .about-btn-label { display: none; } /* "about" text hidden, just the badge */
+  .about-panel { padding: 1.85rem 1.5rem 1.5rem; }
+
+  /* the scrollable mobile view fills the space between header and tab bar */
+  .mobile-canvas {
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - 52px - var(--tab-h));
+    overflow: hidden;
+  }
+
+  /* big headline above the project list */
+  .mobile-hero {
+    padding: 2rem 1.25rem 1.5rem;
+    border-bottom: var(--border);
+    flex-shrink: 0;
+  }
+  .mobile-hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 2rem;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .mobile-hero p {
+    font-size: 0.7rem;
+    color: var(--stone);
+    margin-top: 0.4rem;
+  }
+
+  /* scrollable list container */
+  .mobile-projects {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* individual project row */
+  .mobile-project {
+    display: flex;
+    align-items: stretch;
+    border-bottom: var(--border);
+    min-height: 76px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.1s;
+    text-decoration: none;
+    color: inherit;
+  }
+  .mobile-project:active { background: rgba(21, 19, 15, 0.06); }
+
+  /* small house icon column */
+  .mp-house {
+    width: 52px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.75rem;
+  }
+  .mp-house svg {
+    width: 40px;
+    height: 36px;
+    overflow: visible;
+  }
+
+  /* project name, description, status */
+  .mp-body {
+    flex: 1;
+    padding: 1rem 0.5rem 1rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.25rem;
+    border-left: 1.5px solid var(--ink);
+  }
+  .mp-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .mp-desc {
+    font-size: 0.65rem;
+    color: var(--stone);
+    line-height: 1.4;
+  }
+  .mp-status {
+    font-size: 0.55rem;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 0.2rem;
+  }
+  .mp-status--live     { color: var(--grass); font-weight: 700; }
+  .mp-status--building { color: var(--stone); }
+
+  /* arrow chevron on the right */
+  .mp-arrow {
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    font-size: 1.1rem;
+    color: var(--stone);
+    flex-shrink: 0;
+  }
+  .mobile-project--building .mp-arrow { opacity: 0.2; }
+
+  /* bottom navigation tab bar */
+  .mobile-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--tab-h);
+    padding-bottom: var(--safe-bottom);
+    background: var(--paper);
+    border-top: var(--border);
+    z-index: 500;
+  }
+
+  .mobile-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    border-right: 2px solid var(--ink);
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    padding: 0;
+    transition: background 0.1s;
+    min-height: 44px;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-tab:last-child { border-right: none; }
+  .mobile-tab:active     { background: rgba(21, 19, 15, 0.12); }
+  .mobile-tab.active     { background: var(--ink); }
+
+  /* icon and label inside each tab */
+  .mobile-tab.active .mobile-tab-icon,
+  .mobile-tab.active .mobile-tab-label { color: var(--paper); }
+
+  .mobile-tab-icon { font-size: 1.3rem; line-height: 1; color: var(--ink); }
+  .mobile-tab-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--stone);
+  }
+
+} /* end @media (max-width: 640px) */
+
+
+/* ─────────────────────────────────────────────
+   13. DESKTOP-ONLY OVERRIDES  (≥ 641px)
+   Hide the mobile-only elements on wider screens.
+───────────────────────────────────────────── */
+@media (min-width: 641px) {
+  .mobile-canvas { display: none; }
+  .mobile-bar    { display: none; }
+}
+
+
+/* ─────────────────────────────────────────────
+   14. REDUCED-MOTION OVERRIDES
+   Respect the user's OS preference and strip
+   out all transitions / animations.
+───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  /* kill the animated bits */
+  .live-pulse,
+  .smoke circle { animation: none !important; }
+
+  /* strip transitions on interactive elements */
+  .node-house,
+  .node-tip,
+  #cursor { transition: none !important; }
+
+  .mobile-project { transition: none !important; }
+}
