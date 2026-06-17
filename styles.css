@@ -242,6 +242,17 @@ header {
   transform: rotate(90deg);
 }
 
+.about-panel a {
+  color: var(--flame);
+  text-decoration: underline;
+  cursor: pointer;
+
+}
+.about-panel a:hover {
+  color: var(--pink);
+  text-decoration: none;
+}
+
 /* small house icon at the top of the panel */
 .about-house {
   width: 56px;
