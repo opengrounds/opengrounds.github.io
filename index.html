@@ -656,12 +656,12 @@
        tabindex="0" role="button" aria-label="davis map — live">
     <div class="live-pulse"></div>
     <div class="node-house-wrap"><svg class="node-house" viewBox="0 0 100 100" width="92" height="92" xmlns="http://www.w3.org/2000/svg">
-      <!-- chimney, anchored into the roof slope -->
-      <rect x="66" y="18" width="10" height="26" fill="var(--ink)"/>
+      <!-- chimney -->
+      <rect x="66" y="10" width="10" height="18" fill="var(--ink)"/>
       <g class="smoke">
-        <circle cx="71" cy="14" r="3" fill="var(--stone)" opacity="0.5"/>
-        <circle cx="75" cy="6" r="3.6" fill="var(--stone)" opacity="0.35"/>
-        <circle cx="70" cy="-2" r="4.2" fill="var(--stone)" opacity="0.2"/>
+        <circle cx="71" cy="6" r="3" fill="var(--stone)" opacity="0.5"/>
+        <circle cx="75" cy="-2" r="3.6" fill="var(--stone)" opacity="0.35"/>
+        <circle cx="70" cy="-10" r="4.2" fill="var(--stone)" opacity="0.2"/>
       </g>
       <!-- roof -->
       <polygon points="50,8 94,42 6,42" fill="var(--flame)" stroke="var(--ink)" stroke-width="2.5"/>
@@ -677,6 +677,12 @@
       <rect x="68" y="54" width="14" height="14" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"/>
       <line x1="75" y1="54" x2="75" y2="68" stroke="var(--ink)" stroke-width="1.5"/>
       <line x1="68" y1="61" x2="82" y2="61" stroke="var(--ink)" stroke-width="1.5"/>
+      <!-- mailbox by the path: post, loaf-shaped box, little flag -->
+      <line x1="6" y1="92" x2="6" y2="80" stroke="var(--ink)" stroke-width="1.6"/>
+      <rect x="0" y="78" width="12" height="6" fill="var(--sky)" stroke="var(--ink)" stroke-width="1.3"/>
+      <path d="M0,78 A6,6 0 0,1 12,78" fill="var(--sky)" stroke="var(--ink)" stroke-width="1.3"/>
+      <line x1="10" y1="76" x2="10" y2="71" stroke="var(--ink)" stroke-width="1.1"/>
+      <polygon points="10,71 10,75 14,73" fill="var(--flame)" stroke="var(--ink)" stroke-width="1"/>
       <!-- ground line -->
       <line x1="2" y1="92" x2="98" y2="92" stroke="var(--ink)" stroke-width="2"/>
     </svg></div>
@@ -712,11 +718,15 @@
       <!-- window -->
       <rect x="56" y="50" width="11" height="11" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.6"/>
       <line x1="61.5" y1="50" x2="61.5" y2="61" stroke="var(--ink)" stroke-width="1.2"/>
-      <!-- crane -->
-      <line x1="92" y1="6" x2="92" y2="42" stroke="var(--ink)" stroke-width="2"/>
-      <line x1="92" y1="8" x2="74" y2="8" stroke="var(--ink)" stroke-width="2"/>
-      <line x1="86" y1="8" x2="86" y2="16" stroke="var(--ink)" stroke-width="1.5"/>
-      <rect x="83" y="16" width="6" height="5" fill="var(--sun)" stroke="var(--ink)" stroke-width="1.2"/>
+      <!-- lamppost: flared base, slim pole, lantern with peaked cap -->
+      <g>
+        <polygon points="89,92 97,92 95,87 91,87" fill="var(--ink)"/>
+        <rect x="92" y="24" width="3" height="63" fill="var(--ink)"/>
+        <rect x="87" y="14" width="13" height="13" rx="1.5" fill="var(--sun)" stroke="var(--ink)" stroke-width="1.6"/>
+        <polygon points="87,14 93.5,7 100,14" fill="var(--ink)"/>
+        <line x1="93.5" y1="7" x2="93.5" y2="3" stroke="var(--ink)" stroke-width="1.6"/>
+        <circle cx="93.5" cy="2" r="1.4" fill="var(--ink)"/>
+      </g>
       <line x1="2" y1="92" x2="98" y2="92" stroke="var(--ink)" stroke-width="2"/>
     </svg></div>
     <div class="node-tip">map + living guide<br>for zero-waste living</div>
@@ -730,24 +740,25 @@
        data-xl="74" data-yl="68"
        data-url="#"
        tabindex="0" role="button" aria-label="bay area — building">
-    <div class="node-house-wrap"><svg class="node-house" viewBox="0 0 100 100" width="86" height="86" xmlns="http://www.w3.org/2000/svg">
-      <!-- roof frame only, no fill -->
-      <polygon points="50,8 94,42 6,42" fill="none" stroke="var(--stone)" stroke-width="2.2" stroke-dasharray="5 4"/>
-      <!-- body frame -->
-      <rect x="10" y="42" width="80" height="50" fill="none" stroke="var(--stone)" stroke-width="2.2" stroke-dasharray="5 4"/>
-      <!-- foundation blocks laid along the ground -->
-      <g fill="var(--stone)" opacity="0.55">
-        <rect x="10" y="86" width="18" height="6"/>
-        <rect x="31" y="86" width="18" height="6"/>
-        <rect x="52" y="86" width="18" height="6"/>
-        <rect x="73" y="86" width="17" height="6"/>
-      </g>
-      <!-- small built corner, sitting on the foundation -->
-      <rect x="10" y="62" width="24" height="24" fill="var(--sky)" opacity="0.88" stroke="var(--ink)" stroke-width="2"/>
-      <rect x="16" y="68" width="9" height="9" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.4"/>
-      <!-- survey stake with flag, planted in open ground -->
-      <line x1="68" y1="86" x2="68" y2="56" stroke="var(--ink)" stroke-width="1.8"/>
-      <polygon points="68,56 68,66 82,61" fill="var(--sun)" stroke="var(--ink)" stroke-width="1.3"/>
+    <div class="node-house-wrap"><svg class="node-house" viewBox="0 0 100 100" width="88" height="88" xmlns="http://www.w3.org/2000/svg">
+      <!-- main gabled roof, unbuilt outline -->
+      <polygon points="38,10 70,34 6,34" fill="none" stroke="var(--stone)" stroke-width="2" stroke-dasharray="4 4"/>
+      <!-- main body, unbuilt outline -->
+      <rect x="6" y="34" width="64" height="58" fill="none" stroke="var(--stone)" stroke-width="2" stroke-dasharray="4 4"/>
+      <!-- turret cone roof, built -->
+      <polygon points="84,4 96,28 72,28" fill="var(--sky)" stroke="var(--ink)" stroke-width="2"/>
+      <line x1="84" y1="4" x2="84" y2="-2" stroke="var(--ink)" stroke-width="1.4"/>
+      <circle cx="84" cy="-3.5" r="1.3" fill="var(--ink)"/>
+      <!-- turret body, rounded bay tower, built -->
+      <path d="M72,28 L72,92 L96,92 L96,28 Q84,20 72,28 Z" fill="var(--sky)" opacity="0.85" stroke="var(--ink)" stroke-width="2"/>
+      <!-- turret windows, stacked -->
+      <rect x="77" y="38" width="14" height="13" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.4"/>
+      <line x1="84" y1="38" x2="84" y2="51" stroke="var(--ink)" stroke-width="1"/>
+      <rect x="77" y="58" width="14" height="13" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.4"/>
+      <line x1="84" y1="58" x2="84" y2="71" stroke="var(--ink)" stroke-width="1"/>
+      <!-- door at base of turret -->
+      <rect x="79" y="78" width="10" height="14" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.4"/>
+      <!-- ground -->
       <line x1="2" y1="92" x2="98" y2="92" stroke="var(--ink)" stroke-width="2"/>
     </svg></div>
     <div class="node-tip">equitable access<br>at a regional scale</div>
@@ -762,18 +773,25 @@
        data-url="#"
        tabindex="0" role="button" aria-label="print map — building">
     <div class="node-house-wrap"><svg class="node-house" viewBox="0 0 100 100" width="80" height="80" xmlns="http://www.w3.org/2000/svg">
-      <!-- faint blueprint outline -->
-      <polygon points="50,8 94,42 6,42" fill="none" stroke="var(--stone)" stroke-width="1.6" stroke-dasharray="3 4" opacity="0.5"/>
-      <rect x="10" y="42" width="80" height="50" fill="none" stroke="var(--stone)" stroke-width="1.6" stroke-dasharray="3 4" opacity="0.5"/>
-      <!-- string line marking out the plot -->
-      <line x1="10" y1="68" x2="90" y2="68" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="2 3"/>
-      <!-- corner stakes, short, planted in the ground -->
-      <line x1="10" y1="92" x2="10" y2="64" stroke="var(--ink)" stroke-width="2"/>
-      <line x1="90" y1="92" x2="90" y2="64" stroke="var(--ink)" stroke-width="2"/>
-      <!-- small flag near the post, well under the roofline -->
-      <polygon points="90,64 90,72 100,68" fill="var(--sun)" stroke="var(--ink)" stroke-width="1.3"/>
-      <!-- a single laid corner tile -->
-      <rect x="10" y="68" width="22" height="24" fill="var(--sun)" opacity="0.9" stroke="var(--ink)" stroke-width="2"/>
+      <!-- kiosk frame: unbuilt, dashed, matches the other in-progress houses -->
+      <polygon points="6,38 94,38 84,20 16,20" fill="none" stroke="var(--stone)" stroke-width="2.2" stroke-dasharray="5 4"/>
+      <line x1="14" y1="38" x2="14" y2="92" stroke="var(--stone)" stroke-width="2.2" stroke-dasharray="5 4"/>
+      <line x1="86" y1="38" x2="86" y2="92" stroke="var(--stone)" stroke-width="2.2" stroke-dasharray="5 4"/>
+      <rect x="14" y="62" width="72" height="30" fill="none" stroke="var(--stone)" stroke-width="2.2" stroke-dasharray="5 4"/>
+
+      <!-- flag on top of the roof: straight edge at pole, pointed swallowtail fly -->
+      <line x1="50" y1="20" x2="50" y2="0" stroke="var(--ink)" stroke-width="1.6"/>
+      <path d="M50,2 L50,16 L68,15 L58,10 L68,5 Z" fill="var(--flame)" stroke="var(--ink)" stroke-width="1.2"/>
+
+      <!-- counter top, the one built surface -->
+      <rect x="14" y="62" width="72" height="8" fill="var(--sun)" stroke="var(--ink)" stroke-width="2"/>
+
+      <!-- wood panel lines on the kiosk base, below the counter -->
+      <line x1="32" y1="70" x2="32" y2="92" stroke="var(--stone)" stroke-width="1.2" stroke-dasharray="4 4"/>
+      <line x1="50" y1="70" x2="50" y2="92" stroke="var(--stone)" stroke-width="1.2" stroke-dasharray="4 4"/>
+      <line x1="68" y1="70" x2="68" y2="92" stroke="var(--stone)" stroke-width="1.2" stroke-dasharray="4 4"/>
+
+      <!-- ground -->
       <line x1="2" y1="92" x2="98" y2="92" stroke="var(--ink)" stroke-width="2"/>
     </svg></div>
     <div class="node-tip">printable &amp; forkable<br>start in davis → any city</div>
