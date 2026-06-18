@@ -667,20 +667,56 @@ footer {
     color: inherit;
   }
   .mobile-project:active { background: rgba(21, 19, 15, 0.06); }
+  .mobile-project:active .mp-house svg { transform: scale(0.92); }
 
   /* small house icon column */
   .mp-house {
-    width: 52px;
+    width: 60px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 0.75rem;
+    padding: 0 0.6rem;
+    position: relative;
   }
   .mp-house svg {
-    width: 40px;
-    height: 36px;
+    width: 46px;
+    height: 42px;
     overflow: visible;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.12s ease;
+  }
+
+  /* glow ring behind the live house icon in the mobile list, same idea as
+     the desktop .live-pulse but sized down for the smaller icon */
+  .mp-live-pulse {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 87, 34, 0.32) 0%, rgba(255, 87, 34, 0) 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulseGlow 2.6s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* each row drops in with a short delay after the next, so the list
+     feels like it's settling into place rather than just appearing */
+  .mobile-project {
+    animation: rowSettle 0.4s ease-out backwards;
+  }
+  .mobile-project:nth-child(1) { animation-delay: 0.05s; }
+  .mobile-project:nth-child(2) { animation-delay: 0.12s; }
+  .mobile-project:nth-child(3) { animation-delay: 0.19s; }
+  .mobile-project:nth-child(4) { animation-delay: 0.26s; }
+
+  @keyframes rowSettle {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   /* project name, description, status */
@@ -796,6 +832,8 @@ footer {
 @media (prefers-reduced-motion: reduce) {
   /* kill the animated bits */
   .live-pulse,
+  .mp-live-pulse,
+  .mobile-project,
   .smoke circle { animation: none !important; }
 
   /* strip transitions on interactive elements */
